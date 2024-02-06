@@ -23,21 +23,11 @@ p = GPIO.PWM(servo_pin, 50)
 p.start(7.5)
 
 def servo_func(angle):
-    #Position "0" (1.5 ms pulse) is middle, "90" (~2ms pulse) is middle, is all the 
-    # way to the right, "-90" (~1ms pulse) is all the way to the left
-    # 1.5ms/20ms    = 7.5%  90 deg
-    # 2ms/20ms      = 10%   180 deg
-    # 1ms/20ms      = 5%    0deg
-    # assume linear
+    # by experimentation
+    duty_180deg = 11.5
+    duty_0deg = 2.5
     
-    # datasheet is shit idk
-    
-    # 7.5%  90 deg
-    # 12.5% 180 deg
-    # 2.5%  0deg
-    # assume linear
-    
-    duty = ((12.5-2.5)/180)*angle + 2.5
+    duty = ((duty_180deg-duty_0deg)/180)*angle + duty_0deg
     print("duty:", duty)
     p.ChangeDutyCycle(duty)
     
@@ -47,7 +37,8 @@ try:
         while input_angle == "":
             input_angle = input("What is your angle in degrees?")
             
-            if not input_angle.isdigit() or int(input_angle) < 0 or int(input_angle) > 180:
+            #takes in angle +-1 deg, as servo is not that precise anyways
+            if not input_angle.isnumber() or int(input_angle) < 0 or int(input_angle) > 180:
                 print("invalid input")
                 break
             
