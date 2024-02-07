@@ -8,8 +8,8 @@ import time
 import RPi.GPIO as GPIO
 
 # Set pin numbering convention
-GPIO.setmode (GPIO.BCM) # PWM GPIO12
-             
+GPIO.setmode(GPIO.BCM)  # PWM GPIO12
+
 # Choose an appropriate pwm channel to be used to control the servo
 servo_pin = 12
 
@@ -22,30 +22,49 @@ p = GPIO.PWM(servo_pin, 50)
 # Set servo to 90 degrees as it's starting position
 p.start(7.5)
 
+
 def servo_func(angle):
     # by experimentation
     duty_180deg = 11.5
     duty_0deg = 2.5
-    
-    duty = ((duty_180deg-duty_0deg)/180)*angle + duty_0deg
+
+    duty = ((duty_180deg - duty_0deg) / 180) * angle + duty_0deg
     print("duty:", duty)
     p.ChangeDutyCycle(duty)
-    
+
+
+# If the given input is valid (integer between 0 and 180), returns the value as int.
+# Otherwise, return -1.
+def to_integer(input_str):
+    # Invalid if not an integer
+    if not input_str.isnumeric():
+        return -1
+
+    value = int(input_str)
+
+    # Invalid if not in [0, 180]
+    if value < 0 or value > 180:
+        return -1
+
+    return value
+
+
 try:
     while True:
-        input_angle = ""
-        while input_angle == "":
-            input_angle = input("What is your angle in degrees?")
-            
-            #takes in angle +-1 deg, as servo is not that precise anyways
-            if not input_angle.isnumber() or int(input_angle) < 0 or int(input_angle) > 180:
-                print("invalid input")
-                break
-            
-            servo_func(int(input_angle))
-            print("input_angle:", int(input_angle))
-            time.sleep(0.3)
-                
+        input_str = input("What is your angle in degrees?")
+
+        angle = to_integer(input_str)
+
+        # if angle is -1, it means that the input is invalid
+        if angle == -1:
+            continue
+
+        print("input_angle:", angle)
+
+        # set servo to the designated angle
+        servo_func(angle)
+        time.sleep(0.3)
+
 except KeyboardInterrupt:
     p.stop()
     GPIO.cleanup()
